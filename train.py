@@ -28,8 +28,7 @@ from keras.callbacks import TensorBoard
 from keras.callbacks import Callback
 
 sys.path.append('models')
-from CNN import cnn_v1
-from ESIM import esim, decomposable_attention
+from CNN import cnn_v1,cnn_v2,rnn_v1,rcnn_v1
 sys.path.append('utils/')
 import config
 
@@ -40,7 +39,6 @@ from help import score, train_batch_generator, train_test, get_X_Y_from_df
 def train(model_name, model):
 
     path = config.origin_csv
-    vocab, embed_weights = make_w2v(path)
     print('load data')
     data = read_hdf(path)
     train, dev = train_test(data)
@@ -74,6 +72,20 @@ def main(model_name):
     if model_name == 'cnn1':
         model = cnn_v1(config.word_maxlen,
                        embed_weights, pretrain=True)
+    #0.58
+    if model_name == 'cnn2':
+        model = cnn_v2(config.word_maxlen,
+                       embed_weights, pretrain=True)
+    #0.62
+    if model_name == 'rnn1':
+        model = rnn_v1(config.word_maxlen,
+                      embed_weights, pretrain=True)
+    
+    #0.61
+    if model_name == 'rcnn1':
+        model = rcnn_v1(config.word_maxlen,
+                       embed_weights, pretrain=True)
+
 
     train(model_name, model)
 

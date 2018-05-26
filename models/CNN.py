@@ -44,7 +44,7 @@ def convs_block2(data, convs=[3, 4, 5], f=256, name="conv_feat"):
     for c in convs:
         conv = Activation(activation="relu")(BatchNormalization()(
             Conv1D(filters=f, kernel_size=c, padding="valid")(data)))
-        conv = MaxPool1D(pool_size=10)(conv)
+        #conv = MaxPool1D(pool_size=10)(conv)
         conv = Activation(activation="relu")(BatchNormalization()(
             Conv1D(filters=f, kernel_size=c, padding="valid")(conv)))
 
@@ -55,156 +55,114 @@ def convs_block2(data, convs=[3, 4, 5], f=256, name="conv_feat"):
 
 def cnn_v1(seq_length, embed_weight, pretrain=False):
 
-    q1_q2 = Input(shape=(seq_length,), dtype="int32")
+    main_input = Input(shape=(seq_length,), dtype="int32")
 
     in_dim, out_dim = embed_weight.shape
     embedding = Embedding(input_dim=in_dim, weights=[
         embed_weight], output_dim=out_dim, trainable=False)
 
     q1_q2 = Activation(activation="relu")(
-        BatchNormalization()((TimeDistributed(Dense(256))(embedding(q1_q2)))))
+        BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
 
     q1_q2 = convs_block(q1_q2)
-
+    q1_q2 = Dropout(0.2)(q1_q2)
     q1_q2 = Dropout(0.5)(q1_q2)
     fc = Activation(activation="relu")(
         BatchNormalization()(Dense(256)(q1_q2)))
     output = Dense(3, activation="softmax")(fc)
     print(output)
-    model = Model(inputs=q1_input, outputs=output)
+    model = Model(inputs=main_input, outputs=output)
     model.compile(loss='categorical_crossentropy',
                   optimizer="adam", metrics=['accuracy'])
     model.summary()
     return model
 
 
-# def get_textcnn3(seq_length, embed_weight, pretrain=False):
-#     '''
-#     deep cnn conv + maxpooling + conv + maxpooling
-#     '''
-#     content = Input(shape=(seq_length,), dtype="int32")
-#     if pretrain:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#                               'vocab_size'], weights=[embed_weight], output_dim=config['w2v_vec_dim'], trainable=False)
-#     else:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#                               'vocab_size'], output_dim=config['w2v_vec_dim'], trainable=True)
-#     trans_content = Activation(activation="relu")(
-#         BatchNormalization()((TimeDistributed(Dense(256))(embedding(content)))))
-#     feat = convs_block2(trans_content)
+def cnn_v2(seq_length, embed_weight, pretrain=False):
+    '''
+    deep cnn conv + maxpooling + conv + maxpooling
+    '''
+    content = Input(shape=(seq_length,), dtype="int32")
+    in_dim, out_dim = embed_weight.shape
+    embedding = Embedding(input_dim=in_dim, weights=[
+        embed_weight], output_dim=out_dim, trainable=False)
 
-#     dropfeat = Dropout(0.2)(feat)
-#     fc = Activation(activation="relu")(
-#         BatchNormalization()(Dense(256)(dropfeat)))
-#     output = Dense(2, activation="softmax")(fc)
-#     model = Model(inputs=content, outputs=output)
-#     model.compile(loss='categorical_crossentropy',
-#                   optimizer="adam", metrics=['accuracy'])
-#     model.summary()
-#     return model
+    trans_content = Activation(activation="relu")(
+        BatchNormalization()((TimeDistributed(Dense(256))(embedding(content)))))
+    feat = convs_block2(trans_content, convs=[1, 2, 3, 4, 5, 6, 7])
+
+    dropfeat = Dropout(0.2)(feat)
+    fc = Activation(activation="relu")(
+        BatchNormalization()(Dense(256)(dropfeat)))
+    output = Dense(3, activation="softmax")(fc)
+    model = Model(inputs=content, outputs=output)
+    model.compile(loss='categorical_crossentropy',
+                  optimizer="adam", metrics=['accuracy'])
+    model.summary()
+    return model
 
 
-# def get_textcnn2(seq_length, embed_weight, pretrain=False):
-#     # 模型结构：词嵌入-卷积池化-卷积池化-flat-drop-softmax
-
-#     main_input = Input(shape=(seq_length,), dtype='float64')
-
-#     # 词嵌入（使用预训练的词向量）
-
-#     if pretrain:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#                               'vocab_size'], weights=[embed_weight], output_dim=config['w2v_vec_dim'], trainable=False)
-#     else:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#                               'vocab_size'], output_dim=config['w2v_vec_dim'], trainable=True)
-#     embed = embedding(main_input)
-
-#     cnn = Activation(activation='relu')(BatchNormalization()(
-#         Convolution1D(filters=256, kernel_size=3, padding='valid')(embed)))
-#     cnn = MaxPool1D(pool_size=4)(cnn)
-
-#     cnn = Activation(activation='relu')(BatchNormalization()(
-#         Convolution1D(filters=256, kernel_size=3, padding='valid')(cnn)))
-#     #cnn = MaxPool1D(pool_size=4)(cnn)
-#     cnn = GlobalMaxPool1D()(cnn)
-#     #cnn = Flatten()(cnn)
-#     drop = Dropout(0.2)(cnn)
-#     main_output = Dense(config['number_classes'], activation='softmax')(drop)
-#     model = Model(inputs=main_input, outputs=main_output)
-#     model.compile(loss='categorical_crossentropy',
-#                   optimizer=Adam(), metrics=['accuracy'])
-#     return model
 
 
-# def get_textrnn(seq_length, embed_weight, pretrain=False):
-#     # 模型结构：词嵌入-卷积池化*3-拼接-全连接-dropout-全连接
+def rnn_v1(seq_length, embed_weight, pretrain=False):
+    # 模型结构：词嵌入-卷积池化*3-拼接-全连接-dropout-全连接
 
-#     main_input = Input(shape=(seq_length,), dtype='float64')
+    main_input = Input(shape=(seq_length,), dtype='float64')
 
-#     # 词嵌入（使用预训练的词向量）
+    # 词嵌入（使用预训练的词向量）
 
-#     if pretrain:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#             'vocab_size'], weights=[embed_weight], output_dim=config['w2v_vec_dim'], trainable=False)
-#     else:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#             'vocab_size'], output_dim=config['w2v_vec_dim'], trainable=True)
-#     content = embedding(main_input)
-#     # trans_content = Activation(activation="relu")(
-#     #     BatchNormalization()((TimeDistributed(Dense(256))(embedding(co
-#     # print('Build model...')
-#     embed = Bidirectional(GRU(256))(content)
+    in_dim, out_dim = embed_weight.shape
+    embedding = Embedding(input_dim=in_dim, weights=[
+        embed_weight], output_dim=out_dim, trainable=False)
+    content = Activation(activation="relu")(
+        BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
+    content = Bidirectional(GRU(256))(content)
+    content = Dropout(0.3)(content)
+    fc = Activation(activation="relu")(
+        BatchNormalization()(Dense(256)(content)))
+    main_output = Dense(3,
+                        activation='softmax')(fc)
 
-#     # merged = layers.add([encoded_sentence, encoded_question])
-#     merged = BatchNormalization(embed)
-#     merged = Dropout(0.3)(merged)
-#     fc = Activation(activation="relu")(
-#         BatchNormalization()(Dense(256)(merged)))
-#     main_output = Dense(config['number_classes'],
-#                         activation='softmax')(fc)
-
-#     model = Model(inputs=main_input, outputs=main_output)
-#     model.compile(optimizer='adam',
-#                   loss='categorical_crossentropy',
-#                   metrics=['accuracy'])
-#     return model
+    model = Model(inputs=main_input, outputs=main_output)
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    model.summary()
+    return model
 
 
-# def get_textrcnn(seq_length, embed_weight, pretrain=False,trainable=False):
-#     # 模型结构：词嵌入-卷积池化
+def rcnn_v1(seq_length, embed_weight, pretrain=False,trainable=False):
+    # 模型结构：词嵌入-卷积池化
 
-#     main_input = Input(shape=(seq_length,), dtype='float64')
+    main_input = Input(shape=(seq_length,), dtype='float64')
 
-#     # 词嵌入（使用预训练的词向量）
+    # 词嵌入（使用预训练的词向量）
 
-#     if pretrain:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#             'vocab_size'], weights=[embed_weight], output_dim=config['w2v_vec_dim'], trainable=trainable)
-#     else:
-#         embedding = Embedding(name='word_embedding', input_dim=config[
-#             'vocab_size'], output_dim=config['w2v_vec_dim'], trainable=True)
+    in_dim, out_dim = embed_weight.shape
+    embedding = Embedding(input_dim=in_dim, weights=[
+        embed_weight], output_dim=out_dim, trainable=False)
 
-#     print('Build model...')
-#     content = embedding(main_input)
-#     trans_content = Activation(activation="relu")(
-#         BatchNormalization()((TimeDistributed(Dense(256))(content))))
-#     conv = Activation(activation="relu")(BatchNormalization()(
-#         Conv1D(filters=128, kernel_size=5, padding="valid")(trans_content)))
+    content = embedding(main_input)
+    trans_content = Activation(activation="relu")(
+        BatchNormalization()((TimeDistributed(Dense(256))(content))))
+    conv = Activation(activation="relu")(BatchNormalization()(
+        Conv1D(filters=128, kernel_size=5, padding="valid")(trans_content)))
 
-#     cnn1 = conv
-#     cnn1 = MaxPool1D(pool_size=5)(cnn1)
-#     gru = Bidirectional(GRU(128))(cnn1)
+    cnn1 = conv
+    cnn1 = MaxPool1D(pool_size=5)(cnn1)
+    gru = Bidirectional(GRU(128))(cnn1)
 
-#     merged = Activation(activation="relu")(gru)
-#     merged = Dropout(0.2)(merged)
-#     main_output = Dense(config['number_classes'],
-#                         activation='softmax')(merged)
+    merged = Activation(activation="relu")(gru)
+    merged = Dropout(0.2)(merged)
+    main_output = Dense(3,
+                        activation='softmax')(merged)
 
-#     model = Model(inputs=main_input, outputs=main_output)
-#     model.compile(optimizer='adam',
-#                   loss='categorical_crossentropy',
-#                   metrics=['accuracy'])
-#     return model
+    model = Model(inputs=main_input, outputs=main_output)
+    model.compile(optimizer='adam',
+                  loss='categorical_crossentropy',
+                  metrics=['accuracy'])
+    model.summary()
+    return model
 
 
 # def model3():
