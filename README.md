@@ -6,6 +6,6 @@
 
 ## submit 
 
-### after train, model save in data/model_dir  
-### chouse a model and modefiy model path in  summit.py    
-### finally run summit.py
+ after train, model save in data/model_dir  
+ chouse a model and modefiy model path in  summit.py    
+ finally run summit.py
