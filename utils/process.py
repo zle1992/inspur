@@ -74,7 +74,7 @@ def word2id(contents, word_voc):
 
 def read_cut(path):
 
-    data = pd.read_csv(path, encoding='utf8',
+    data = pd.read_csv(path, encoding='ISO-8859-1',#encoding='utf8',
                        names=['id', 'review', 'label'])[1:]
 
     data['review'] = data['review'].astype(str)
