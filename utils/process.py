@@ -30,8 +30,10 @@ def cut_single(x):
 def make_w2v(path):
     if not os.path.exists(config.w2v_content_word_model):
 
-        data = read_cut(path)
-        content = list(data.review_cut)
+        data1 = read_cut(config.origin_csv)
+        data2 = read_cut(config.test_csv)
+        content = list(data1.review_cut) + list(data2.review_cut)
+        print('content len: ',len(content))
         model = Word2Vec(content, size=config.w2v_vec_dim, window=5, min_count=5,
                          )
         model.save(config.w2v_content_word_model)

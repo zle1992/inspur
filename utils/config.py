@@ -11,7 +11,7 @@ word_maxlen = 20
 model_dir = 'data/model_dir'
 jieba_dict = 'data/jieba_dict.txt'
 origin_csv = 'data/training-inspur.csv'
-
+test_csv = 'submit/Preliminary-texting.csv'
 #最原始
 word_embed_weight = 'data/word_embed_weight_.npy'
 w2v_content_word_model = 'data/train_w2v.model'
