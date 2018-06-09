@@ -24,15 +24,12 @@ from process import read_data, make_w2v
 from help import get_X_Y_from_df
 
 
-# for file in os.listdir('./'):
-#     if file.endswith('.h5'):
-#         model_path = file    
-
-model_path = config.model_dir + '/dp_embed_cnn1_0.6385.h5'
 
 
-def main(in_path, out_path):
 
+def main(model_path):
+    in_path = 'submit/Preliminary-texting.csv'
+    out_path = 'submit/{0}_dsjyycxds_preliminary.txt'.format(model_path.split('/')[-1])
     vocab, embed_weights = make_w2v(config.origin_csv)
     data = read_data(in_path)
     data.label = data.label.fillna(0)
@@ -46,7 +43,6 @@ def main(in_path, out_path):
         out_path, index=False, header=None, sep='\t')
 
 if __name__ == '__main__':
-    in_path = 'submit/Preliminary-texting.csv'
-    out_path = 'submit/dsjyycxds_preliminary.txt'
-    main(in_path, out_path)
-    #main(sys.argv[1], sys.argv[2])
+
+    main(sys.argv[1])
+    

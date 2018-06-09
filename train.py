@@ -45,8 +45,9 @@ def train(model_name, model):
     x_train, y_train = get_X_Y_from_df(train)
     x_dev, y_dev = get_X_Y_from_df(dev)
 
-    for i in range(15):
-        if i == 9:
+    for i in range(20):
+        K.set_value(model.optimizer.lr, 0.1)
+        if i ==18:
             K.set_value(model.optimizer.lr, 0.0001)
 
         model.fit_generator(

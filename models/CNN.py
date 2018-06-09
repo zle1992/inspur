@@ -116,8 +116,8 @@ def rnn_v1(seq_length, embed_weight, pretrain=False):
         embed_weight], output_dim=out_dim, trainable=False)
     content = Activation(activation="relu")(
         BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
-    content = Bidirectional(GRU(256))(content)
-    content = Dropout(0.3)(content)
+    content = Bidirectional(LSTM(256))(content)
+    content = Dropout(0.5)(content)
     fc = Activation(activation="relu")(
         BatchNormalization()(Dense(256)(content)))
     main_output = Dense(3,

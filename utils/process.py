@@ -20,7 +20,10 @@ stopwords = ['?', ',', '。']
 
 def cut_single(x):
     res = []
-    setence_seged = jieba.cut(x.strip())
+    if config.cut_char_level:
+        setence_seged = list(x.strip())
+    else:
+        setence_seged = jieba.cut(x.strip())
     for word in setence_seged:
         if word not in stopwords:
             res.append(word)
