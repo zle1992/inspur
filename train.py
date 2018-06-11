@@ -32,22 +32,20 @@ from CNN import cnn_v1,cnn_v2,rnn_v1,rcnn_v1
 sys.path.append('utils/')
 import config
 
-from process import read_hdf, make_w2v
 from help import score, train_batch_generator, train_test, get_X_Y_from_df
-
-
+from CutWord import cut_word,read_cut
+from Data2id import data2id
 def train(model_name, model):
-
-    path = config.origin_csv
     print('load data')
-    data = read_hdf(path)
+    data = read_cut(config.origin_csv,config.train_data_cut_hdf)
+    data = data2id(data)
     train, dev = train_test(data)
     x_train, y_train = get_X_Y_from_df(train)
     x_dev, y_dev = get_X_Y_from_df(dev)
 
-    for i in range(20):
-        K.set_value(model.optimizer.lr, 0.1)
-        if i ==18:
+    for i in range(12):
+        K.set_value(model.optimizer.lr, 0.01)
+        if i ==8:
             K.set_value(model.optimizer.lr, 0.0001)
 
         model.fit_generator(
@@ -68,7 +66,8 @@ def train(model_name, model):
 def main(model_name):
     print('model name', model_name)
     path = config.origin_csv
-    vocab, embed_weights = make_w2v(path)
+    from w2v import load_my_train_w2v,load_pre_train_w2v
+    vocab, embed_weights = load_my_train_w2v(config.origin_csv)
 
     if model_name == 'cnn1':
         model = cnn_v1(config.word_maxlen,

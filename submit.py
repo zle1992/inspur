@@ -20,18 +20,25 @@ from keras import backend
 # Model Load
 sys.path.append('utils/')
 import config
-from process import read_data, make_w2v
 from help import get_X_Y_from_df
 
-
+from CutWord import cut_word,read_cut
+from Data2id import data2id
+def train(model_name, model):
+    print('load data')
+    data = read_cut(config.origin_csv)
+    data = data2id(data)
+    train, dev = train_test(data)
+    x_train, y_train = get_X_Y_from_df(train)
+    x_dev, y_dev = get_X_Y_from_df(dev)
 
 
 
 def main(model_path):
     in_path = 'submit/Preliminary-texting.csv'
     out_path = 'submit/{0}_dsjyycxds_preliminary.txt'.format(model_path.split('/')[-1])
-    vocab, embed_weights = make_w2v(config.origin_csv)
-    data = read_data(in_path)
+    data = read_cut(in_path,config.test_data_cut_hdf)
+    data = data2id(data)
     data.label = data.label.fillna(0)
     X, _ = get_X_Y_from_df(data)
     print('load model and predict')
