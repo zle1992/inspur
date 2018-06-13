@@ -5,15 +5,16 @@
 batch_size = 128
 number_classes = 2
 w2v_vec_dim = 256
-word_maxlen = 40
+word_maxlen = 60
 
 cut_char_level = False
 model_dir = 'data/model_dir'
 jieba_dict = 'data/jieba/jieba_dict.txt'
 stopwords_path = 'data/jieba/stops.txt'
-origin_csv = 'data/training-inspur.csv'
 test_csv = 'submit/Preliminary-texting.csv'
 
+#origin_csv = 'data/training-inspur.csv'
+origin_csv = 'data/training-3_parts.csv'
 #w2v
 word_embed_weight = 'data/my_w2v/word_embed_weight_word.npy'
 w2v_content_word_model = 'data/my_w2v/train_word.model'

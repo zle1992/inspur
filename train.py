@@ -29,6 +29,7 @@ from keras.callbacks import Callback
 
 sys.path.append('models')
 from CNN import cnn_v1,cnn_v2,rnn_v1,rcnn_v1
+from RNN import rnn_att,rnn_att2
 sys.path.append('utils/')
 import config
 
@@ -44,7 +45,7 @@ def train(model_name, model):
     x_dev, y_dev = get_X_Y_from_df(dev)
 
     for i in range(12):
-        K.set_value(model.optimizer.lr, 0.01)
+        K.set_value(model.optimizer.lr, 0.0005)
         if i ==8:
             K.set_value(model.optimizer.lr, 0.0001)
 
@@ -84,8 +85,11 @@ def main(model_name):
     #0.61
     if model_name == 'rcnn1':
         model = rcnn_v1(config.word_maxlen,
-                       embed_weights, pretrain=True)
-
+                       embed_weights, pretrain=True,trainable=True)
+    if model_name == 'rnn_att':
+        model = rnn_att()
+    if model_name == 'rnn_att2':
+        model = rnn_att2()
 
     train(model_name, model)
 

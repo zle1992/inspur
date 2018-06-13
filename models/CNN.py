@@ -59,7 +59,7 @@ def cnn_v1(seq_length, embed_weight, pretrain=False):
 
     in_dim, out_dim = embed_weight.shape
     embedding = Embedding(input_dim=in_dim, weights=[
-        embed_weight], output_dim=out_dim, trainable=False)
+        embed_weight], output_dim=out_dim, trainable=True)
 
     q1_q2 = Activation(activation="relu")(
         BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
@@ -115,7 +115,7 @@ def rnn_v1(seq_length, embed_weight, pretrain=False):
         embed_weight], output_dim=out_dim, trainable=False)
     content = Activation(activation="relu")(
         BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
-    content = Bidirectional(LSTM(256))(content)
+    content = Bidirectional(CuDNNGRU(256))(content)
     content = Dropout(0.5)(content)
     fc = Activation(activation="relu")(
         BatchNormalization()(Dense(256)(content)))
@@ -149,7 +149,7 @@ def rcnn_v1(seq_length, embed_weight, pretrain=False,trainable=False):
 
     cnn1 = conv
     cnn1 = MaxPool1D(pool_size=5)(cnn1)
-    gru = Bidirectional(GRU(128))(cnn1)
+    gru = Bidirectional(CuDNNGRU(128))(cnn1)
 
     merged = Activation(activation="relu")(gru)
     merged = Dropout(0.2)(merged)

@@ -24,6 +24,14 @@ from help import get_X_Y_from_df
 
 from CutWord import cut_word,read_cut
 from Data2id import data2id
+
+
+sys.path.append('utils/')
+sys.path.append('models/')
+import config
+from base import TextModel, Attention
+MAX_LEN = config.word_maxlen 
+
 def train(model_name, model):
     print('load data')
     data = read_cut(config.origin_csv)
@@ -42,7 +50,7 @@ def main(model_path):
     data.label = data.label.fillna(0)
     X, _ = get_X_Y_from_df(data)
     print('load model and predict')
-    model = load_model(model_path, custom_objects={"softmax": softmax})
+    model = load_model(model_path, custom_objects={"softmax": softmax,"Attention":Attention})
 
     test_model_pred = np.squeeze(model.predict(X))
     data['label'] = np.argmax(test_model_pred, axis=1) +1
