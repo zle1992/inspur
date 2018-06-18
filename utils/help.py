@@ -60,10 +60,9 @@ def score(label, pred, gate=0.5):
 
 
 def get_X_Y_from_df(data):
+    
     data_review = np.array(list(data.review_id.values))
-
     data_label = data.label.astype(int).values - 1
-
     X = data_review
     Y = keras.utils.to_categorical(data_label, num_classes=3)
     return X, Y

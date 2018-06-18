@@ -94,7 +94,7 @@ def make_w2v(path):
         data2 = read_cut(config.test_csv,config.test_data_cut_hdf)
         content = list(data1.review_cut) + list(data2.review_cut)
         print('content len: ',len(content))
-        model = Word2Vec(content, size=config.w2v_vec_dim, window=5, min_count=5,
+        model = Word2Vec(content, size=config.w2v_vec_dim, window=5, min_count=2,
                          )
         model.save(config.w2v_content_word_model)
 

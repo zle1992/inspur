@@ -81,7 +81,7 @@ def rnn_att2(pretrained_embedding=config.word_embed_weight, LSTM_hidden_size = 1
     x = Dense(256, activation='relu')(x)
     x = Dense(3, activation='linear')(x)
     model = Model(inputs=inputs, outputs=x)
-    model.compile(loss='mse',
+    model.compile(loss='categorical_crossentropy',
                   optimizer="adam", metrics=['accuracy'])
     model.summary()
     return model

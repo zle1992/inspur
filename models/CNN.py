@@ -28,7 +28,13 @@ from keras import backend as K
 sys.path.append('utils/')
 import config
 
-
+def create_pretrained_embedding(trainable=True, **kwargs):
+    "Create embedding layer from a pretrained weights array"
+    pretrained_weights = np.load(config.word_embed_weight)
+    in_dim, out_dim = pretrained_weights.shape
+    embedding = Embedding(in_dim, out_dim, weights=[
+                          pretrained_weights], trainable=trainable, **kwargs)
+    return embedding
 def convs_block(data, convs=[3, 4, 5], f=256):
     pools = []
     for c in convs:
@@ -53,23 +59,21 @@ def convs_block2(data, convs=[3, 4, 5], f=256, name="conv_feat"):
     return concatenate(pools, name=name)
 
 
-def cnn_v1(seq_length, embed_weight, pretrain=False):
+def cnn_v1():
 
-    main_input = Input(shape=(seq_length,), dtype="int32")
+    main_input = Input(shape=(config.word_maxlen,), dtype="int32")
 
-    in_dim, out_dim = embed_weight.shape
-    embedding = Embedding(input_dim=in_dim, weights=[
-        embed_weight], output_dim=out_dim, trainable=True)
+    embedding = create_pretrained_embedding(mask_zero=False)
 
-    q1_q2 = Activation(activation="relu")(
+    review = Activation(activation="relu")(
         BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
 
-    q1_q2 = convs_block(q1_q2)
-    q1_q2 = Dropout(0.5)(q1_q2)
+    review = convs_block(review)
+    review = Dropout(0.2)(review)
     fc = Activation(activation="relu")(
-        BatchNormalization()(Dense(256)(q1_q2)))
+        BatchNormalization()(Dense(256)(review)))
+
     output = Dense(3, activation="softmax")(fc)
-    print(output)
     model = Model(inputs=main_input, outputs=output)
     model.compile(loss='categorical_crossentropy',
                   optimizer="adam", metrics=['accuracy'])
@@ -77,24 +81,23 @@ def cnn_v1(seq_length, embed_weight, pretrain=False):
     return model
 
 
-def cnn_v2(seq_length, embed_weight, pretrain=False):
+def cnn_v2():
     '''
     deep cnn conv + maxpooling + conv + maxpooling
     '''
-    content = Input(shape=(seq_length,), dtype="int32")
-    in_dim, out_dim = embed_weight.shape
-    embedding = Embedding(input_dim=in_dim, weights=[
-        embed_weight], output_dim=out_dim, trainable=False)
+    main_input = Input(shape=(config.word_maxlen,), dtype="int32")
+
+    embedding = create_pretrained_embedding(mask_zero=False)
 
     trans_content = Activation(activation="relu")(
-        BatchNormalization()((TimeDistributed(Dense(256))(embedding(content)))))
+        BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
     feat = convs_block2(trans_content, convs=[1, 2, 3, 4, 5, 6, 7])
 
     dropfeat = Dropout(0.5)(feat)
     fc = Activation(activation="relu")(
         BatchNormalization()(Dense(256)(dropfeat)))
     output = Dense(3, activation="softmax")(fc)
-    model = Model(inputs=content, outputs=output)
+    model = Model(inputs=main_input, outputs=output)
     model.compile(loss='categorical_crossentropy',
                   optimizer="adam", metrics=['accuracy'])
     model.summary()
@@ -103,16 +106,13 @@ def cnn_v2(seq_length, embed_weight, pretrain=False):
 
 
 
-def rnn_v1(seq_length, embed_weight, pretrain=False):
-    # 模型结构：词嵌入-卷积池化*3-拼接-全连接-dropout-全连接
+def rnn_v1():
+    
 
-    main_input = Input(shape=(seq_length,), dtype='float64')
+    main_input = Input(shape=(config.word_maxlen,), dtype="int32")
 
-    # 词嵌入（使用预训练的词向量）
+    embedding = create_pretrained_embedding(mask_zero=False)
 
-    in_dim, out_dim = embed_weight.shape
-    embedding = Embedding(input_dim=in_dim, weights=[
-        embed_weight], output_dim=out_dim, trainable=False)
     content = Activation(activation="relu")(
         BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
     content = Bidirectional(CuDNNGRU(256))(content)
@@ -130,16 +130,11 @@ def rnn_v1(seq_length, embed_weight, pretrain=False):
     return model
 
 
-def rcnn_v1(seq_length, embed_weight, pretrain=False,trainable=False):
-    # 模型结构：词嵌入-卷积池化
+def rcnn_v1():
 
-    main_input = Input(shape=(seq_length,), dtype='float64')
+    main_input = Input(shape=(config.word_maxlen,), dtype="int32")
 
-    # 词嵌入（使用预训练的词向量）
-
-    in_dim, out_dim = embed_weight.shape
-    embedding = Embedding(input_dim=in_dim, weights=[
-        embed_weight], output_dim=out_dim, trainable=False)
+    embedding = create_pretrained_embedding(mask_zero=False)
 
     content = embedding(main_input)
     trans_content = Activation(activation="relu")(

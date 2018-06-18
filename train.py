@@ -36,6 +36,11 @@ import config
 from help import score, train_batch_generator, train_test, get_X_Y_from_df
 from CutWord import cut_word,read_cut
 from Data2id import data2id
+from sklearn.metrics import accuracy_score,confusion_matrix
+
+
+
+
 def train(model_name, model):
     print('load data')
     data = read_cut(config.origin_csv,config.train_data_cut_hdf)
@@ -59,6 +64,14 @@ def train(model_name, model):
         print('EVL')
         pred = model.predict(x_dev, batch_size=config.batch_size)
         pre, rec, f1 = score(y_dev, pred)
+
+
+        y_t=np.argmax(y_dev, axis=1)
+        y_p = np.argmax(pred, axis=1)
+        print(y_t)
+        print(y_p)
+        acc = accuracy_score(y_t, y_p)
+        print(confusion_matrix(y_t, y_p))
         model.save(config.model_dir + "/dp_embed_%s_%s.h5" %
                    (model_name, f1))
         print('p r f1 ', pre, rec, f1)
