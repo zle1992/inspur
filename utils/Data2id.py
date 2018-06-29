@@ -19,7 +19,6 @@ def padding_id(ids, padding_token=0, padding_length=None):
     else:
         return ids + [padding_token] * (padding_length - len(ids))
 
-
 def word2id(contents, word_voc):
     ''' contents  list
     '''
@@ -30,11 +29,7 @@ def word2id(contents, word_voc):
 
     return padding_id(ids, padding_token=0, padding_length=config.word_maxlen)
 
-
-
-
 def data2id(data):
-
     data['review_id'] = data['review_cut'].map(lambda x: word2id(x, vocab))
     return data
 

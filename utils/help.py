@@ -5,28 +5,6 @@ from sklearn.metrics import confusion_matrix, accuracy_score, f1_score, precisio
 import keras
 
 
-def train_batch_generator2(x_source, y_source, batch):
-    q1_source = x_source[0]
-    q2_source = x_source[1]
-    while True:
-        batch_list_x1 = []
-        batch_list_x2 = []
-
-        batch_list_y = []
-        for q1, q2, y in zip(q1_source, q2_source, y_source):
-            x1 = q1.astype('float32')
-            x2 = q2.astype('float32')
-            batch_list_x1.append(x1)
-            batch_list_x2.append(x2)
-
-            batch_list_y.append(y)
-            if len(batch_list_y) == batch:
-                yield ([np.array(batch_list_x1), np.array(batch_list_x2)], np.array(batch_list_y))
-                batch_list_x1 = []
-                batch_list_x2 = []
-                batch_list_y = []
-
-
 def train_batch_generator(x_source, y_source, batch):
 
     while True:

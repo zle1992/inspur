@@ -28,7 +28,7 @@ from keras import backend as K
 sys.path.append('utils/')
 import config
 
-def create_pretrained_embedding(trainable=True, **kwargs):
+def create_pretrained_embedding(trainable=False, **kwargs):
     "Create embedding layer from a pretrained weights array"
     pretrained_weights = np.load(config.word_embed_weight)
     in_dim, out_dim = pretrained_weights.shape
@@ -65,9 +65,11 @@ def cnn_v1():
 
     embedding = create_pretrained_embedding(mask_zero=False)
 
-    review = Activation(activation="relu")(
-        BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
+    # review = Activation(activation="relu")(
+    #     BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
 
+
+    review = embedding(main_input)
     review = convs_block(review)
     review = Dropout(0.2)(review)
     fc = Activation(activation="relu")(
@@ -91,7 +93,7 @@ def cnn_v2():
 
     trans_content = Activation(activation="relu")(
         BatchNormalization()((TimeDistributed(Dense(256))(embedding(main_input)))))
-    feat = convs_block2(trans_content, convs=[1, 2, 3, 4, 5, 6, 7])
+    feat = convs_block2(trans_content, convs=[1, 2, 3,])
 
     dropfeat = Dropout(0.5)(feat)
     fc = Activation(activation="relu")(
@@ -138,9 +140,9 @@ def rcnn_v1():
 
     content = embedding(main_input)
     trans_content = Activation(activation="relu")(
-        BatchNormalization()((TimeDistributed(Dense(256))(content))))
+        BatchNormalization()((TimeDistributed(Dense(64))(content))))
     conv = Activation(activation="relu")(BatchNormalization()(
-        Conv1D(filters=128, kernel_size=5, padding="valid")(trans_content)))
+        Conv1D(filters=32, kernel_size=3, padding="valid")(trans_content)))
 
     cnn1 = conv
     cnn1 = MaxPool1D(pool_size=5)(cnn1)

@@ -12,7 +12,9 @@ from keras.layers import Layer, Activation
 from keras import initializers, regularizers, constraints
 from keras import backend as K
 from sklearn.model_selection import StratifiedKFold, train_test_split
-
+import sys
+sys.path.append('utils/')
+import config
 
 
 
@@ -191,7 +193,7 @@ class TextModel(object):
 
 
 class Attention(Layer):
-    def __init__(self, step_dim,
+    def __init__(self, step_dim=config.word_maxlen,
                  W_regularizer=None, b_regularizer=None,
                  W_constraint=None, b_constraint=None,
                  bias=True, **kwargs):

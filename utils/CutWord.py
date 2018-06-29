@@ -14,7 +14,7 @@ import config
 jieba.load_userdict(config.jieba_dict)
 stopwords = [line.strip() for line in open(config.stopwords_path, 'r').readlines()]
 
-
+#stopwords=[]
 
 
 def clean_str(x):
