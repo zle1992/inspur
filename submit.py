@@ -35,32 +35,7 @@ import config
 from base import TextModel, Attention
 MAX_LEN = config.word_maxlen 
 
-def load_my_model(model_name,model_path):
-    lr = 0.001
-    if model_name == 'cnn1':
-        model = cnn_v1()
-    #0.58
-    if model_name == 'cnn2':
-        model = cnn_v2()
-    #0.62
-    if model_name == 'rnn1':
-        model = rnn_v1()
-    
-    #0.66
-    if model_name == 'rcnn1':
-        model = rcnn_v1()
-    #0.65
-    if model_name == 'rnn_att':
-        model = rnn_att()
-    #0.66
-    if model_name == 'rnn_att2':
-        model = rnn_att2()
-
-    model.load_weights(model_path)
-    model.compile(loss='binary_crossentropy',
-                  optimizer=Adam(lr=lr),metrics = ['acc'])
- 
-    return model
+from train import get_model
 
 CustomObjects={
 "softmax": softmax,
@@ -77,7 +52,10 @@ def make_test_cv_data(data, model_name, kfolds):
         print('kf: ', kf)
         bst_model_path = config.stack_path + \
         "dp_%s_%d.h5" % (model_name,kf)
-        model = load_my_model(model_name,bst_model_path)
+        model,lr = get_model(model_name)
+        model.load_weights(bst_model_path)
+        model.compile(loss='binary_crossentropy',
+                  optimizer=Adam(lr=lr),metrics = ['acc'])
         pred = model.predict(X_dev, batch_size=config.batch_size)
        
         pred_probs +=pred
@@ -101,7 +79,10 @@ def single_submit(data,model_name):
     X, _ = get_X_Y_from_df(data)
     bst_model_path = config.model_dir + \
         "dp_embed_%s.h5" % ( model_name)
-    model = load_my_model(model_name,bst_model_path)
+    model,lr = get_model(model_name)
+    model.load_weights(bst_model_path)
+    model.compile(loss='binary_crossentropy',
+                  optimizer=Adam(lr=lr),metrics = ['acc'])
     test_pred = model.predict(X, batch_size=config.batch_size)
     return test_pred
 
@@ -116,7 +97,7 @@ def submit(in_path,out_path,model_name,cv=False):
     if not cv:
         test_pred = single_submit(data,model_name)
     else:
-        test_pred = make_test_cv_data(data, model_name, kfolds=5)
+        test_pred = make_test_cv_data(data, model_name, kfolds=10)
     test_model_pred = np.squeeze(test_pred)
     data['label'] = np.argmax(test_model_pred, axis=1) +1
     data[['label']].to_csv(
