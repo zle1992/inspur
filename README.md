@@ -11,12 +11,12 @@ model/
 模型函数
 
 
-util/
-config.py  一些文件路径及参数
-cutword.py  :分词
-data2id.py  把词映射成id
-help.py 一些辅助函数，如划分训练验证。
-w2v.py  训练词向量
+util/    
+config.py  一些文件路径及参数    
+cutword.py  :分词    
+data2id.py  把词映射成id    
+help.py 一些辅助函数，如划分训练验证。     
+w2v.py  训练词向量    
 
 
 
