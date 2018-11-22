@@ -25,9 +25,9 @@ w2v.py  训练词向量
 python  util/w2v.py  
 训练词向量。（自动调用分词，data2id）
 
-python train.py cv  cnn1  
+python main.py cv  cnn1 trian  
 对cnn1模型采用交叉验证。
 
-python submit.py  提交结果  
-模型选择及cv 记得修改main()函数
+python main.py cv  cnn1 submit   
+对cnn1模型cv提交结果。
 
