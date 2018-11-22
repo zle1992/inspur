@@ -170,9 +170,10 @@ if __name__ == '__main__':
 
     m,model_name,flag=sys.argv[1],sys.argv[2],sys.argv[3]
     
-    train(m=='cv',model_name)
+    
     
     if flag=="submit":
         submit(m=='cv',model_name)
-    
+    else:
+        train(m=='cv',model_name)
     
